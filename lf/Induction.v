@@ -841,35 +841,63 @@ Fixpoint normalize (b: bin) : bin :=
   | A b' =>
     match (normalize b') with
     | Z => Z
-    | A b'' => A (A b'')
-    | B b'' => A (B b'')
+    | b'' => A b''
     end
   | B b' => B (normalize b')
   end.
 
-Lemma norm_A_bin_Z_norm_bin_Z: forall b : bin,
-  normalize (A b) = Z -> normalize b = Z.
+Lemma plus_1_r: forall (n : nat),
+  S n = n + 1.
 Proof.
-  induction b as [|b2 H2| b3 H3].
-  - 
-Qed.
-
-Lemma bin_norm_Z_nat_0 : forall b : bin,
-  normalize b = Z -> bin_to_nat b = 0.
-Proof.
-  intros b H.
-  induction b as [| b1 H1| b2 H2].
+  induction n as [| n' IH].
   - reflexivity.
-  - simpl. 
- 
-Theorem bin_nat_eq_norm: forall b: bin,
+  - simpl. rewrite IH. reflexivity. Qed.
+
+Lemma nat_to_bin_double_n: forall (n : nat),
+  nat_to_bin (S n + S n) = A (nat_to_bin (S n)).
+Proof.
+  induction n as [| n' IH].
+  - reflexivity.
+  - (* Try to transform the left side of equation to use IH and use S to represent (n' + 1). *)
+    rewrite (plus_1_r n').
+    simpl. rewrite (plus_comm (n' + 1) (S (n' + 1))). simpl.
+    rewrite <- (plus_1_r n'). rewrite IH.
+    destruct (nat_to_bin (S n')).
+    + reflexivity.
+    + reflexivity.
+    + reflexivity. Qed.
+
+(* First, we try to write a proof and assuming unproved lemma. *)
+Theorem bin_nat_bin : forall (b: bin),
   nat_to_bin (bin_to_nat b) = normalize b.
 Proof.
   induction b as [| b1 IH1| b2 IH2].
   - reflexivity.
-  - simpl. destruct (normalize b1) eqn:Eb1.
-    +simpl.
-Qed.
+  - simpl.
+    (* Observe that if we use IH1 here, the (bin_to_nat b1) will occur three times, which is becoming more convenient to destruct. *)
+    rewrite <- IH1.
+    destruct (bin_to_nat b1) eqn:E_bin_to_nat_b1.
+    + simpl. reflexivity.
+    + (* Stuck here, write a correct and proof-promising lemma. *)
+      rewrite nat_to_bin_double_n. simpl.
+      destruct (nat_to_bin n) eqn:E_nat_to_bin_n.
+      * reflexivity.
+      * simpl. reflexivity.
+      * simpl. reflexivity.
+  - simpl.
+    (* Rewrite IH and destruct by similar reason. *)
+    rewrite <- IH2. rewrite <- (plus_n_O (bin_to_nat b2)).
+    destruct (bin_to_nat b2).
+    + reflexivity.
+    + (* Restate the leftside to use the lemma. *)
+    rewrite (plus_comm (S n + S n) 1). rewrite <- (plus_1_l n). rewrite (plus_comm 1 n). simpl. rewrite (plus_comm n 1). rewrite (plus_1_l n). rewrite nat_to_bin_double_n. simpl.
+      (* Destruct similar term works a lot. *)
+      destruct (incr (nat_to_bin n)) eqn:E_incr_nat_to_bin_n.
+      * reflexivity.
+      * reflexivity.
+      * reflexivity. Qed.
+
+(* References: https://github.com/marshall-lee/software_foundations/blob/master/Induction.v *)
 
 (* Do not modify the following line: *)
 Definition manual_grade_for_binary_inverse_c : option (nat*string) := None.
