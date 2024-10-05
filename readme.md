@@ -1,5 +1,7 @@
 I'm going to do the exercises of [Software Foundations](https://softwarefoundations.cis.upenn.edu/current/index.html).
 
+**Warning: for people who take this course in the university, please do not look at this repository and try to do exercises by yourself.**
+
 ## Logical Foundations
 
 | Chapter Name | Progress  | Update Time |
